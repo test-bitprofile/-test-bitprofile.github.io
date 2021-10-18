@@ -1006,6 +1006,7 @@ async function loadProfile() {
   var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
 
   // await web3Modal.clearCachedProvider()
+
   console.log("Opening a dialog", web3Modal);
   try {
     // provider = await web3Modal.connect();
