@@ -1158,12 +1158,12 @@ async function enter_app() {
       window.location.href = ethaddress;
     }
     else {
-      alert("Could not get a wallet connection", e);
+      alert("Could not get a wallet connection");
       return;
     }
   }
   catch(e) {
-    alert("Could not get a wallet connection", e);
+    // alert("Could not get a wallet connection", e);
     return;
   }
 }
