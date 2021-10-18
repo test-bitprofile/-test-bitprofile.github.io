@@ -1,0 +1,136 @@
+<html lang="en">
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TL8GNHF3XS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-TL8GNHF3XS');
+  </script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>BitProfile</title>
+
+  <link rel="icon" type="image/png" href="/img/icon.png" sizes="400x400">
+  <!-- <link rel="icon" type="image/png" href="img/icon_16.png" sizes="16x16"> -->
+  <!-- <link rel="icon" type="image/png" href="img/icon_32.png" sizes="32x32"> -->
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom fonts for this template -->
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+  <link href="vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+  <!-- Custom styles for this template -->
+  <link href="css/landing-page.css" rel="stylesheet">
+</head>
+
+<!-- <div id="chainModal" class="chain-modal">
+  <div class="chain-modal-content text-center">
+    <p>Choose an Ethereum chain</p>
+    <button class="chain-button">Mainnet</button><button class="chain-button">Matic</button>
+  </div>
+</div> -->
+
+<div id="chainModal" class="chain-modal">
+  <div class="chain-modal-content text-center">
+    <p>Choose an Ethereum chain</p>
+    <button class="chain-button">Mainnet</button><button class="chain-button">Matic</button>
+  </div>
+</div>
+
+<div id="newLinkModal" class="new-link-modal">
+  <div class="new-link-modal-content text-center">
+    <input id="new_link_url" class="new_link_input" placeholder="Url" />
+    <input id="new_link_name" class="new_link_input" placeholder="Name" />
+    <button id="new_link_submit_button">Submit</button>
+  </div>
+</div>
+
+<div id="followersModal" class="followers-modal">
+  <div class="followers-modal-content text-center">
+    <div class="row mx-auto col-12 mb-2 mt-0">
+      <p class="col-12" id="followersModalTitle">Followers</p>
+    </div>
+    <div id="followers_holder">
+
+    </div>
+  </div>
+</div>
+
+<body style="background-color: #f7f7f7">
+  <div id="background"></div>
+  <div id="background2"></div>
+  <div class="row mx-auto" style="background-color: rgba(0, 0, 0, 0);">
+    <div class="col-lg-12 text-center brand-logo mx-auto my-auto">
+
+      <div class="container">
+        <div class="row">
+          <div class="col-sm">
+            <p id="logo"><img src="/img/logo.png" style="width: 30px; height: 30px; margin-right: 5px; margin-bottom: 5px;" /> BitProfile <strong> Protocol</strong><a style="margin-left: 10px;" href="https://twitter.com/bitprofile_io" target="_blank" class="fa fa-twitter"></a></p>
+          </div>
+          <div class="col-sm">
+            <input placeholder="Search for address or ENS" id="searchbar"/><button id="search_button" class="fa fa-search"></button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 25px;margin-bottom: 10px;"><a id="username" target="_blank"></a></div>
+      <div id="follow_div" style="display: none">
+        <button id="following_button" class="follow-num-button"><strong id="following_num"></strong> Following</button><button id="followers_button" class="follow-num-button"><strong id="followers_num"></strong> Followers</button>
+      </div>
+      <button id="follow-button" class="follow-button" style="display: none;">Follow</button>
+    </div>
+  </div>
+
+  <main class="scroll-container mt-5">
+    <section>
+      <div class="container col-xl-4 col-md-8 text-center my-auto mx-auto" id="link-holder" style="display: none">
+      </div>
+    </section>
+
+    <section>
+      <div class="container col-xl-4 col-lg-5 col-md-8 text-center my-auto mx-auto mb-4" id="recommended-followers" style="display: none">
+        <div class="text-center col-12 my-auto mx-auto">
+          <label id="follow-label">Accounts you've interacted with:</label>
+        </div>
+
+          <!-- 
+        <div>
+          <a href="http://etherscan.com" style="color: white;">0x4090...92d79</a><button class="rec-interaction-button">View Interaction</button><button class="rec-follow-button">Follow</button>
+        </div>
+        <div>
+          <a href="http://etherscan.com" style="color: white;">andreih.eth</a><button class="rec-interaction-button">View Interaction</button><button class="rec-follow-button">Follow</button>
+        </div> -->
+        <!-- <button id="recommend-show-more">Show More</button><button id="recommend-close">Close</button> -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/web3@1.2.11/dist/web3.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/web3modal@1.9.0/dist/index.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
+  <script type="text/javascript" src="./js/index.js"></script>
+
+</body>
+</html>
