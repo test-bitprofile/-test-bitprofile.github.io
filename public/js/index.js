@@ -1009,10 +1009,10 @@ async function loadProfile() {
 
   console.log("Opening a dialog", web3Modal);
   try {
-    // provider = await web3Modal.connect();
-    if (web3Modal.cachedProvider) {
-      provider = await web3Modal.connect();
-    }
+    provider = await web3Modal.connect();
+    // if (web3Modal.cachedProvider) {
+      // provider = await web3Modal.connect();
+    // }
 
     web3_user = new Web3(provider);
     const accounts = await web3_user.eth.getAccounts();
@@ -1147,24 +1147,25 @@ function setupSearch() {
 }
 
 async function enter_app() {
+  await web3Modal.clearCachedProvider()
   try {
-        provider = await web3Modal.connect();
-        web3_user = new Web3(provider);
-        const accounts = await web3_user.eth.getAccounts();
-        if (accounts !== null) {
-          console.log(accounts[0])
-          ethaddress = accounts[0].toLowerCase();
-          window.location.href = ethaddress;
-        }
-        else {
-          alert("Could not get a wallet connection", e);
-          return;
-        }
-      }
-      catch(e) {
-        alert("Could not get a wallet connection", e);
-        return;
-      }
+    provider = await web3Modal.connect();
+    web3_user = new Web3(provider);
+    const accounts = await web3_user.eth.getAccounts();
+    if (accounts !== null) {
+      console.log(accounts[0])
+      ethaddress = accounts[0].toLowerCase();
+      window.location.href = ethaddress;
+    }
+    else {
+      alert("Could not get a wallet connection", e);
+      return;
+    }
+  }
+  catch(e) {
+    alert("Could not get a wallet connection", e);
+    return;
+  }
 }
 
 function setupEnterApp() {
