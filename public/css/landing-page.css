@@ -144,6 +144,20 @@ body {
   outline:0;
 }
 
+#contact_us {
+  width: 120px;
+  height: 40px;
+  color: white;
+  margin-top: 10px;
+  background-color: #5c5eb5;
+  border-style: none;
+  border-radius: 10px;
+}
+
+#contact_us:focus {
+  outline:0;
+}
+
 #logo-container {
   display: flex; 
   justify-content: center;
@@ -334,8 +348,8 @@ body {
 
 .fa {
   padding: 20px;
-  font-size: 30px;
-  width: 50px;
+  /*font-size: 25px;*/
+  /*width: 40px;*/
   text-align: center;
   text-decoration: none;
 }
@@ -346,6 +360,17 @@ body {
 
 #twitter {
   color: black;
+  width: 5px;
+  height: 5px;
+  font-size: 25px;
+}
+
+@media (min-width: 1000px) {
+  #twitter {
+    width: 30px;
+    height: 30px;
+    font-size: 30px;
+  }
 }
 
 #landing_twitter:hover {
@@ -354,6 +379,77 @@ body {
 
 #landing_twitter {
   color: white;
+  width: 5px;
+  height: 5px;
+  font-size: 25px;
+}
+
+@media (min-width: 1000px) {
+  #landing_twitter {
+    width: 30px;
+    height: 30px;
+    font-size: 30px;
+  }
+}
+
+#discord:hover {
+  opacity: 0.7;
+}
+
+#discord {
+  color: black;
+  width: 30px;
+  height: 30px;
+  margin-left: 15px;
+}
+
+@media (min-width: 700px) {
+  #discord {
+    margin-left: 10px;
+  }
+}
+
+@media (min-width: 1000px) {
+  #discord {
+    margin-left: 20px;
+  }
+}
+
+#landing_discord:hover {
+  opacity: 0.7;
+}
+
+#landing_discord {
+  color: white;
+  width: 30px;
+  height: 30px;
+  margin-left: 15px;
+}
+
+@media (min-width: 700px) {
+  #landing_discord {
+    margin-left: 10px;
+  }
+}
+
+@media (min-width: 1000px) {
+  #landing_discord {
+    margin-left: 20px;
+  }
+}
+
+#medium_post {
+  color: white;
+  font-size: 25px;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: white;
+}
+
+@media (min-width: 1000px) {
+  #medium_post {
+    font-size: 27px;
+  }
 }
 
 #disconnect {
@@ -596,7 +692,7 @@ section {
 #subtitle {
   font-size: 25px;
   color: #FFF;
-  margin-top: 25px;
+  margin-top: 45px;
   margin-bottom: 4%;
   color: white;
   text-shadow: -2px 0 #7000ff;
@@ -606,7 +702,7 @@ section {
 @media (min-width: 768px) {
   #subtitle {
     font-size: 50px;
-    margin-top: 40px;
+    margin-top: 60px;
     margin-bottom: 0px;
     text-shadow: -3px 0 #7000ff;
   }
@@ -869,6 +965,35 @@ section {
 
 @media (min-width: 1000px) {
   .new-polygon-modal-content {
+    margin: 300px auto; /* 15% from the top and centered */
+  }
+}
+
+.new-contact-modal {
+  display: none;
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.new-contact-modal-content {
+  background-color: #fefefe;
+  margin: 200px auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 350px;
+  border-radius: 20px;
+}
+
+@media (min-width: 1000px) {
+  .new-contact-modal-content {
     margin: 300px auto; /* 15% from the top and centered */
   }
 }

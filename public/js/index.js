@@ -1327,6 +1327,11 @@ function setupModals() {
     showFollowing();
   }
 
+  document.getElementById("contact_us").onclick = function() {
+    document.getElementById("contactUsModal").style.display = "block";
+  }
+
+
   window.onclick = function(event) {
     if (event.target == chainModal) {
       chainModal.style.display = "none";
@@ -1343,6 +1348,14 @@ function setupModals() {
     if (event.target == newAvatarModal) {
       newAvatarModal.style.display = "none";
     }
+    var newPolygonModal = document.getElementById("newPolygonModal");
+    if (event.target == newPolygonModal) {
+      newPolygonModal.style.display = "none";
+    }
+    var contactUsModal = document.getElementById("contactUsModal");
+    if (event.target == contactUsModal) {
+      contactUsModal.style.display = "none";
+    }
   }
 
   var closes = document.getElementsByClassName("close");
@@ -1353,9 +1366,9 @@ function setupModals() {
       followersModal.style.display = "none";
       newAvatarModal.style.display = "none";
       newPolygonModal.style.display = "none";
+      contactUsModal.style.display = "none";
     }
-  })
-    
+  })    
 }
 
 function setupSearch() {
