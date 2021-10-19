@@ -464,8 +464,10 @@ async function loadFollowersAndFollowingRinkeby() {
   following = await contract.methods.getFollowing(page_address).call()
   followersCount = await contract.methods.followersCount(page_address).call()
   followingCount = await contract.methods.followingCount(page_address).call()
-  userFollowing = await contract.methods.getFollowing(ethaddress).call()
-  userFollowingCount = await contract.methods.followingCount(ethaddress).call()
+  if (ethaddress != "") {
+    userFollowing = await contract.methods.getFollowing(ethaddress).call()
+    userFollowingCount = await contract.methods.followingCount(ethaddress).call()
+  }
   document.getElementById("following_num").innerHTML = followingCount;
   document.getElementById("followers_num").innerHTML = followersCount;
 
@@ -626,6 +628,7 @@ async function loadLinksRinkeby() {
 
 // This is only for the profile
 async function followUnfollowPage() {
+  await tryToConnect();
   await switchToPolygon();
 
   if (isFollowing) {
@@ -695,6 +698,7 @@ async function followUnfollowPage() {
 
 // This is used by the follow modal for multiple accounts
 async function followUnfollow(address, isFollowing) {
+  await tryToConnect();
   await switchToPolygon();
 
   if (isFollowing) { // unfollow
@@ -787,6 +791,7 @@ async function updateNFT(address, tokenID) {
 }
 
 async function followUnfollowRec(address, isFollowing) {
+  await tryToConnect();
   await switchToPolygon();
 
   if (isFollowing) { // unfollow
@@ -1217,7 +1222,45 @@ async function loadProfile() {
 
   } catch(e) {
     console.log("Could not get a wallet connection", e);
-    return;
+    document.getElementById("username").href = "https://etherscan.io/address/" + page_address
+
+    if (page_address.includes("eth")) {
+      document.getElementById("username").innerHTML = page_address
+      web3_infura_mainnet.eth.ens.getOwner(page_address).then(function (owner) {
+        page_address = owner.toLowerCase();
+
+        loadLinksRinkeby()
+        loadAvatarMainnet()
+
+        loadFollowersAndFollowingRinkeby().then(function() {
+          if (page_address == ethaddress) {
+            getEtherscanTransacations(page_address, web3_user)
+            getOpenseaTransacations(page_address, web3_user)
+          }
+        })
+
+      })
+    }
+    else {
+      getReverseENS(page_address).then((ens_name) => {
+        if (ens_name != null && ens_name != undefined && ens_name != "") {
+          document.getElementById("username").innerHTML = ens_name;
+        }
+        else {
+          document.getElementById("username").innerHTML = getShortAddress(page_address);
+        }
+      })
+      
+      loadLinksRinkeby()
+      loadAvatarMainnet()
+
+      loadFollowersAndFollowingRinkeby().then(function() {
+        if (page_address == ethaddress) {        
+          getEtherscanTransacations(page_address, web3_user)
+          getOpenseaTransacations(page_address, web3_user)
+        }
+      })
+    }
   }
 
 }
@@ -1327,6 +1370,20 @@ function setupSearch() {
         window.location.href = searchText;
       }
   })
+}
+
+async function tryToConnect() {
+  try {
+    provider = await web3Modal.connect();
+    web3_user = new Web3(provider);
+    const accounts = await web3_user.eth.getAccounts();
+    if (accounts !== null) {
+      ethaddress = accounts[0].toLowerCase();
+    }
+  }
+  catch(e) {
+    return;
+  }
 }
 
 async function enter_app() {
