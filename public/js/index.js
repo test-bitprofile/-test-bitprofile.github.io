@@ -199,15 +199,11 @@ async function getENSOwner(ens_name) {
 var suggested_friends = new Set()
 var suggested_from_interacation = {}
 var load_recs_sync = new DispatchGroup();
-var didSyncRec = false
 load_recs_sync.notify(function() {
-  if (didSyncRec) {
-    addRecommendedFollowers()
-  }
+  addRecommendedFollowers()
 })
 async function processTransacationsEtherscan(transactionsJSON, web3) {
   var token_0 = load_recs_sync.enter();
-  didSyncRec = true
   transactionsJSON.result.forEach((transaction) => {
     const hash = transaction.hash;
     const timeStamp = transaction.timeStamp;
