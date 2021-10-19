@@ -1150,19 +1150,25 @@ async function loadProfile() {
       ethaddress = accounts[0].toLowerCase();
     }
 
-    setCookie('faucet','done', 5);
     var x = getCookie('faucet');
+    document.getElementById("polygon_url").href = "https://polygonscan.com/address/" + ethaddress
     if (x == null || x == undefined) {
+      console.log("getting faucet")
       const url = "https://us-central1-bitprofile-f37a0.cloudfunctions.net/bitProfileFaucet?address=" + ethaddress
+      console.log("url: ", url)
       var xmlHttpUpdate = new XMLHttpRequest();
       xmlHttpUpdate.onreadystatechange = function() {
         if (xmlHttpUpdate.readyState == 4 && xmlHttpUpdate.status == 200){
-          const json = JSON.parse(xmlHttpUpdate.responseText);
-          processTransacationsEtherscan(json, web3)
+          console.log("faucet done")
+          setCookie('faucet','done', 5);
+          newPolygonModal.style.display = "block";
         }
       }
       xmlHttpUpdate.open("GET", url, true);
       xmlHttpUpdate.send(null);
+    }
+    else {
+      console.log("already had faucet")
     }
 
     document.getElementById("username").href = "https://etherscan.io/address/" + page_address
@@ -1218,26 +1224,39 @@ async function loadProfile() {
 
 async function switchToPolygon() {
 
-  // polygon is 0x137
+  // polygon is 0x89
   // rinkeby is 0x4
-  try {
-    await ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x137' }],
-    });
-  } 
-  catch (switchError) { // don't need below here but in other places
-    if (switchError.code === 4902) {
-      try {
-        await ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [{ chainId: '0x137', rpcUrl: 'https://rpc-mainnet.matic.network', blockExplorerUrl: 'https://polygonscan.com'}],
-        });
-      } catch (addError) {
-        // handle "add" error
-        alert("Error, couldn't add network.")
+  if (window.ethereum) {
+    try {
+      await ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x89' }],
+      });
+    } 
+    catch (switchError) { // don't need below here but in other places
+      if (switchError.code === 4902) {
+        try {
+          await ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: '0x89',
+                chainName: "Polygon",
+                rpcUrls: ["https://rpc-mainnet.maticvigil.com", "https://rpc-mainnet.matic.network", "https://rpc-mainnet.matic.quiknode.pro"],
+                blockExplorerUrls: ["https://polygonscan.com/"]
+              },
+            ]
+          });
+        } catch (addError) {
+          // handle "add" error
+          alert("Error, couldn't add network.")
+          console.log(addError)
+        }
       }
     }
+  }
+  else {
+    // give alert saying to swtich to polygon
   }
 }
 
@@ -1290,6 +1309,7 @@ function setupModals() {
       newLinkModal.style.display = "none";
       followersModal.style.display = "none";
       newAvatarModal.style.display = "none";
+      newPolygonModal.style.display = "none";
     }
   })
     
@@ -1319,21 +1339,6 @@ async function enter_app() {
       console.log(accounts[0])
       ethaddress = accounts[0].toLowerCase();
       window.location.href = ethaddress;
-
-      setCookie('faucet','done', 5);
-      var x = getCookie('faucet');
-      if (x == null || x == undefined) {
-        const url = "https://us-central1-bitprofile-f37a0.cloudfunctions.net/bitProfileFaucet?address=" + ethaddress
-        var xmlHttpUpdate = new XMLHttpRequest();
-        xmlHttpUpdate.onreadystatechange = function() {
-          if (xmlHttpUpdate.readyState == 4 && xmlHttpUpdate.status == 200){
-            const json = JSON.parse(xmlHttpUpdate.responseText);
-            processTransacationsEtherscan(json, web3)
-          }
-        }
-        xmlHttpUpdate.open("GET", url, true);
-        xmlHttpUpdate.send(null);
-      }
     }
     else {
       alert("Could not get a wallet connection");
@@ -1367,6 +1372,8 @@ function setupEnterApp() {
 // (Done) truncate address username: 0x409...92d79
 
 
+// Popup modal showing message that their account is being funded and to wait a minute.
+
 window.addEventListener('load', async () => {
   init();
   loadProfile();
@@ -1379,7 +1386,7 @@ window.addEventListener('load', async () => {
 
 // move loadLinksRinkeby() to not depend on wallet
 
-// 0x0a22fEa31995ED13D43D37b617C9443ac22818Ad matic deployed contract
+
 
 
 
