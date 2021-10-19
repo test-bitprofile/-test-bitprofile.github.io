@@ -921,6 +921,9 @@ async function addNewAvatar() {
 
 async function addNewLink() {
   await switchToPolygon();
+  if (!isUsingPolygon) {
+    return
+  }
 
   var url = document.getElementById("new_link_url").value;
   var name = document.getElementById("new_link_name").value;
@@ -955,6 +958,9 @@ async function addNewLink() {
 
 async function removeLink(link) {
   await switchToPolygon();
+  if (!isUsingPolygon) {
+    return
+  }
 
   var contract = new web3_user.eth.Contract(contract_abi, contract_address)
   var removeContentLink = contract.methods.removeContentLink(link).encodeABI();
@@ -1262,9 +1268,9 @@ async function loadProfile() {
       })
     }
   }
-
 }
 
+var isUsingPolygon = false
 async function switchToPolygon() {
 
   // polygon is 0x89
@@ -1290,9 +1296,10 @@ async function switchToPolygon() {
               },
             ]
           });
+          isUsingPolygon = true
         } catch (addError) {
           // handle "add" error
-          alert("Error, couldn't add network.")
+          alert("Please switch to polygon network before sending transacation.")
           console.log(addError)
         }
       }
@@ -1300,6 +1307,7 @@ async function switchToPolygon() {
   }
   else {
     // give alert saying to swtich to polygon
+    alert("Please switch to polygon network before sending transacation")
   }
 }
 
