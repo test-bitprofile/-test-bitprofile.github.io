@@ -630,6 +630,10 @@ async function loadLinksRinkeby() {
 async function followUnfollowPage() {
   await tryToConnect();
   await switchToPolygon();
+  if (!isUsingPolygon) {
+    alert("Please switch to polygon network before sending transacation.")
+    return
+  }
 
   if (isFollowing) {
     var contract = new web3_user.eth.Contract(contract_abi, contract_address)
@@ -700,6 +704,10 @@ async function followUnfollowPage() {
 async function followUnfollow(address, isFollowing) {
   await tryToConnect();
   await switchToPolygon();
+  if (!isUsingPolygon) {
+    alert("Please switch to polygon network before sending transacation.")
+    return
+  }
 
   if (isFollowing) { // unfollow
     var contract = new web3_user.eth.Contract(contract_abi, contract_address)
@@ -793,6 +801,10 @@ async function updateNFT(address, tokenID) {
 async function followUnfollowRec(address, isFollowing) {
   await tryToConnect();
   await switchToPolygon();
+  if (!isUsingPolygon) {
+    alert("Please switch to polygon network before sending transacation.")
+    return
+  }
 
   if (isFollowing) { // unfollow
     var contract = new web3_user.eth.Contract(contract_abi, contract_address)
@@ -873,6 +885,16 @@ var getLocation = function(href) {
 };
 
 async function addNewAvatar() {
+  try {
+    await ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x1' }],
+    });
+  } 
+  catch (switchError) {
+    alert("Network switch failed. Try switching to mainnet chain manually.")
+  }
+
   var url_raw = document.getElementById("new_avatar_url").value;
   if (url_raw == "") {
     return
@@ -884,16 +906,6 @@ async function addNewAvatar() {
 
   var contract = new web3_user.eth.Contract(avatar_contract_abi, avatar_contract_address)
   var connectNFT = contract.methods.connectAvatarNFT(nft_addr, nft_id).encodeABI();
-
-  try {
-    await ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x1' }],
-    });
-  } 
-  catch (switchError) {
-    alert("Network switch failed. Try switching to mainnet chain manually.")
-  }
 
   var est = web3_user.eth.estimateGas({"to": avatar_contract_address, "from":ethaddress, "data": connectNFT})
   est.then(function(gasAmount){
