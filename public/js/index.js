@@ -28,7 +28,7 @@ let provider; // Chosen wallet provider given by the dialog window
 var ethaddress = ""; // Address of the selected account
 var page_address = "";
 var web3_user;
-var chainId = 4; // Chain ID of Rinkeby Test Net is 4, replace it to 1 for Main Net
+var chainId = 137; // Chain ID of Rinkeby Test Net is 4, replace it to 1 for Main Net
 
 async function init() {
   const providerOptions = {
@@ -374,7 +374,7 @@ async function getEtherscanTransacations(address, web3) {
 
 // no cache obviously
 async function getNumFollowers(address) {
-  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://polygon-mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   var contract = new web3_rinkeby.eth.Contract(contract_abi, contract_address)
   var followersCount = await contract.methods.followersCount(page_address).call()
   return followersCount
@@ -382,7 +382,7 @@ async function getNumFollowers(address) {
 
 // no cache obviously
 async function getNumFollowing(address) {
-  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://polygon-mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   var contract = new web3_rinkeby.eth.Contract(contract_abi, contract_address)
   var followingCount = await contract.methods.followingCount(page_address).call()
   return followingCount
@@ -390,7 +390,7 @@ async function getNumFollowing(address) {
 
 // this doesn't need cache cuz its only called when following someone
 async function NFTForAddressExists(address) {
-  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://polygon-mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   var contract = new web3_rinkeby.eth.Contract(contract_abi, contract_address)
   var tokenID = await contract.methods.getNFTFromAddress(address).call()
   var tokenExists = await contract.methods.tokenExists(tokenID).call()
@@ -458,7 +458,7 @@ async function loadFollowersAndFollowingRinkeby() {
   following = []
   isFollowing = false
 
-  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://polygon-mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   var contract = new web3_rinkeby.eth.Contract(contract_abi, contract_address)
   followers = await contract.methods.getFollowers(page_address).call()
   following = await contract.methods.getFollowing(page_address).call()
@@ -544,7 +544,7 @@ async function loadLinksRinkeby() {
   didSync = true
 
   document.getElementById("link-holder").innerHTML = ""
-  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+  var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://polygon-mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   var contract = new web3_rinkeby.eth.Contract(contract_abi, contract_address)
   content_links = await contract.methods.getContentLinks(page_address).call()
   var num_content_links = await contract.methods.linksCount(page_address).call()
@@ -659,7 +659,7 @@ async function followUnfollowPage() {
     var contract = new web3_user.eth.Contract(contract_abi, contract_address)
 
     // Create an NFT when following if it doesn't already exist  
-    var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+    var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://polygon-mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
     var tokenID = await contract.methods.getNFTFromAddress(page_address).call()
     var tokenExists = await contract.methods.tokenExists(tokenID).call()
     var follow = contract.methods.follow(page_address).encodeABI();
@@ -730,7 +730,7 @@ async function followUnfollow(address, isFollowing) {
     var contract = new web3_user.eth.Contract(contract_abi, contract_address)
 
     // Create an NFT when following if it doesn't already exist  
-    var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+    var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://polygon-mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
     var tokenID = await contract.methods.getNFTFromAddress(address).call()
     var tokenExists = await contract.methods.tokenExists(tokenID).call()
     var follow = contract.methods.follow(address).encodeABI();
@@ -822,7 +822,7 @@ async function followUnfollowRec(address, isFollowing) {
     var contract = new web3_user.eth.Contract(contract_abi, contract_address)
 
     // Create an NFT when following if it doesn't already exist  
-    var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+    var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://polygon-mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
     var tokenID = await contract.methods.getNFTFromAddress(address).call()
     var tokenExists = await contract.methods.tokenExists(tokenID).call()
     var follow = contract.methods.follow(address).encodeABI();
