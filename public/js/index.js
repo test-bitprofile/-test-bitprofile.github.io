@@ -802,7 +802,6 @@ async function followUnfollowRec(address, isFollowing) {
   await tryToConnect();
   await switchToPolygon();
 
-  alert("hi")
   if (!isUsingPolygon) {
     alert("Please add the polygon network before sending transacation.")
     return
