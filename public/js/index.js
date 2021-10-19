@@ -182,18 +182,26 @@ async function getReverseENS(address) {
 }
 
 async function getENSOwner(ens_name) {
-  var cache_name = "getENSOwner" + ens_name
-  if (shouldUseCache(cache_name, 5)) {
-    return getFromCache(cache_name)
-  }
-  else {
-    var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
-    web3_infura_mainnet.eth.ens.getOwner(ens_name).then(function (retrieved_address) {
-      var address = retrieved_address.toLowerCase();
-      cache(cache_name, address)
-      return address;
-    })
-  } 
+  // var cache_name = "getENSOwner" + ens_name
+  // if (shouldUseCache(cache_name, 5)) {
+  //   return getFromCache(cache_name)
+  // }
+  // else {
+  //   var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+  //   web3_infura_mainnet.eth.ens.getOwner(ens_name).then(function (retrieved_address) {
+  //     var address = retrieved_address.toLowerCase();
+  //     cache(cache_name, address)
+  //     return address;
+  //   })
+  // } 
+  console.log("get ens owner")
+  var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+  web3_infura_mainnet.eth.ens.getOwner(ens_name).then(function (retrieved_address) {
+    console.log(retrieved_address)
+    var address = retrieved_address.toLowerCase();
+    // cache(cache_name, address)
+    return address;
+  })
 }
 
 var suggested_friends = new Set()
@@ -373,23 +381,32 @@ function addRecommendedFollowers() {
   var sync = new DispatchGroup();
   sync.notify(function() {
     if (didSync) {
-      document.getElementById("recommended-followers").style.display = "block";
+      if (suggested_friends.size > 0) {
+        document.getElementById("recommended-followers").style.display = "block";
+      }
+      else {
+        console.log(suggested_friends)
+      }
     }
   })
   var token_0 = sync.enter()
-  didSync = true
+  
 
   suggested_friends.forEach((suggested_friend) => {
     var token = sync.enter()
     if (!(userFollowing.includes(suggested_friend))) { // only show people not following
       if (suggested_friend.includes(".eth")) {
-        getENSOwner(suggested_friend).then(function (retrieved_address) {
-          var address = retrieved_address.toLowerCase()
-          // var div = '<div class="recommended-interaction"><div class="col-12"><a target="_blank" href="http://192.168.1.228:8080/test_profile/?address=' + suggested_friend + '"style="color: black;">' + suggested_friend + '</a></div><div class="col-12"><a class="rec-interaction-link" target="_blank" href="https://etherscan.io/tx/' + suggested_from_interacation[suggested_friend] + '">View</a><button class="rec-follow-button">Follow</button></div></div>'
-          var div = '<div class="recommended-interaction row mx-auto mb-2" id="recommended_interaction_' + address + '"><a href="' + suggested_friend + '" class="followersModalAddress col-12 mx-auto my-auto text-center">' + suggested_friend + '</a><div class="mx-auto my-auto text-center"><button class="rec-interaction-link" style="float: right;" target="_blank" onclick="window.open(\'https://etherscan.io/tx/' + suggested_from_interacation[suggested_friend] + '\', \'_blank\')">Etherscan</button><button class="rec-follow-button" id="rec_follow_button_' + address + '" style="float: left">Follow</button></div></div>'
-          document.getElementById("recommended-followers").innerHTML += div
-          document.getElementById("rec_follow_button_" + address).setAttribute("onclick", 'followUnfollowRec("' + address + '",' + false + ')');
-          sync.leave(token)
+        var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+        web3_infura_mainnet.eth.ens.getOwner(suggested_friend).then(function (retrieved_address) {
+          if (retrieved_address != null) {
+            var address = retrieved_address.toLowerCase()
+            // var div = '<div class="recommended-interaction"><div class="col-12"><a target="_blank" href="http://192.168.1.228:8080/test_profile/?address=' + suggested_friend + '"style="color: black;">' + suggested_friend + '</a></div><div class="col-12"><a class="rec-interaction-link" target="_blank" href="https://etherscan.io/tx/' + suggested_from_interacation[suggested_friend] + '">View</a><button class="rec-follow-button">Follow</button></div></div>'
+            var div = '<div class="recommended-interaction row mx-auto mb-2" id="recommended_interaction_' + address + '"><a href="' + suggested_friend + '" class="followersModalAddress col-12 mx-auto my-auto text-center">' + suggested_friend + '</a><div class="mx-auto my-auto text-center"><button class="rec-interaction-link" style="float: right;" target="_blank" onclick="window.open(\'https://etherscan.io/tx/' + suggested_from_interacation[suggested_friend] + '\', \'_blank\')">Etherscan</button><button class="rec-follow-button" id="rec_follow_button_' + address + '" style="float: left">Follow</button></div></div>'
+            document.getElementById("recommended-followers").innerHTML += div
+            document.getElementById("rec_follow_button_" + address).setAttribute("onclick", 'followUnfollowRec("' + address + '",' + false + ')');
+            sync.leave(token)
+            didSync = true
+          }
         })
       }
       else {
@@ -398,6 +415,7 @@ function addRecommendedFollowers() {
         document.getElementById("recommended-followers").innerHTML += div
         document.getElementById("rec_follow_button_" + suggested_friend).setAttribute("onclick", 'followUnfollowRec("' + suggested_friend + '",' + false + ')');
         sync.leave(token)
+        didSync = true
       }
     }
     else {
@@ -1115,7 +1133,7 @@ async function loadProfile() {
 
     if (page_address.includes("eth")) {
       document.getElementById("username").innerHTML = page_address
-      getENSOwner(page_address).then(function (owner) {
+      web3_infura_mainnet.eth.ens.getOwner(page_address).then(function (owner) {
         page_address = owner.toLowerCase();
 
         loadLinksRinkeby()
