@@ -922,6 +922,7 @@ async function addNewAvatar() {
 async function addNewLink() {
   await switchToPolygon();
   if (!isUsingPolygon) {
+    alert("Please switch to polygon network before sending transacation.")
     return
   }
 
@@ -959,6 +960,7 @@ async function addNewLink() {
 async function removeLink(link) {
   await switchToPolygon();
   if (!isUsingPolygon) {
+    alert("Please switch to polygon network before sending transacation.")
     return
   }
 
@@ -1272,6 +1274,7 @@ async function loadProfile() {
 
 var isUsingPolygon = false
 async function switchToPolygon() {
+  console.log("switching to polygon")
 
   // polygon is 0x89
   // rinkeby is 0x4
@@ -1281,6 +1284,7 @@ async function switchToPolygon() {
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: '0x89' }],
       });
+      isUsingPolygon = true
     } 
     catch (switchError) { // don't need below here but in other places
       if (switchError.code === 4902) {
