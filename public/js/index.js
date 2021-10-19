@@ -631,7 +631,7 @@ async function followUnfollowPage() {
   await tryToConnect();
   await switchToPolygon();
   if (!isUsingPolygon) {
-    alert("Please switch to polygon network before sending transacation.")
+    alert("Please add the polygon network before sending transacation.")
     return
   }
 
@@ -705,7 +705,7 @@ async function followUnfollow(address, isFollowing) {
   await tryToConnect();
   await switchToPolygon();
   if (!isUsingPolygon) {
-    alert("Please switch to polygon network before sending transacation.")
+    alert("Please add the polygon network before sending transacation.")
     return
   }
 
@@ -801,8 +801,10 @@ async function updateNFT(address, tokenID) {
 async function followUnfollowRec(address, isFollowing) {
   await tryToConnect();
   await switchToPolygon();
+
+  alert("hi")
   if (!isUsingPolygon) {
-    alert("Please switch to polygon network before sending transacation.")
+    alert("Please add the polygon network before sending transacation.")
     return
   }
 
@@ -890,6 +892,7 @@ async function addNewAvatar() {
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: '0x1' }],
     });
+    var isUsingPolygon = false
   } 
   catch (switchError) {
     alert("Network switch failed. Try switching to mainnet chain manually.")
@@ -934,7 +937,7 @@ async function addNewAvatar() {
 async function addNewLink() {
   await switchToPolygon();
   if (!isUsingPolygon) {
-    alert("Please switch to polygon network before sending transacation.")
+    alert("Please add the polygon network before sending transacation.")
     return
   }
 
@@ -972,7 +975,7 @@ async function addNewLink() {
 async function removeLink(link) {
   await switchToPolygon();
   if (!isUsingPolygon) {
-    alert("Please switch to polygon network before sending transacation.")
+    alert("Please add the polygon network before sending transacation.")
     return
   }
 
@@ -1315,7 +1318,7 @@ async function switchToPolygon() {
           isUsingPolygon = true
         } catch (addError) {
           // handle "add" error
-          alert("Please switch to polygon network before sending transacation.")
+          alert("Please add the polygon network before sending transacation.")
           console.log(addError)
         }
       }
@@ -1323,7 +1326,7 @@ async function switchToPolygon() {
   }
   else {
     // give alert saying to swtich to polygon
-    alert("Please switch to polygon network before sending transacation")
+    alert("Please add the polygon network before sending transacation")
   }
 }
 
