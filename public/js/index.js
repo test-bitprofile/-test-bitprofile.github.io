@@ -108,37 +108,6 @@ var DispatchGroup = (function() {
     return DispatchGroup;
 })()
 
-function setCookie(name,value,days) {
-    var expires = "";
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
-}
-
-function setCookie(name,value,hours) {
-    var expires = "";
-    if (hours) {
-        var date = new Date();
-        date.setTime(date.getTime() + (hours*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
-}
-
-function getCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-    }
-    return null;
-}
-
 function processERC721Transactions(transactionsJSON) {
   transactionsJSON.result.forEach((transaction) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -162,32 +131,83 @@ function processERC721Transactions(transactionsJSON) {
   });
 }
 
+function getFromCache(key) {
+  var object = JSON.parse(localStorage.getItem(key));
+  return object.value;
+}
+
+function cache(key, value) {
+  var timestamp = Math.floor(Date.now() / 1000);
+  var object = {value: value, timestamp: timestamp}
+  localStorage.setItem(key, JSON.stringify(object));
+}
+
+function shouldUseCache(key, days) {
+  var object = JSON.parse(localStorage.getItem(key));
+  if (object == null || object == undefined) {
+    return false
+  }
+  var timestamp = object.timestamp;
+  var now = Math.floor(Date.now() / 1000);
+  return (now - timestamp) < 60 * 60 * 24 * days;
+}
+
 async function isContractMainnet(address) {
-  var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
-  const byteCode = await web3_infura_mainnet.eth.getCode(address)
-  // console.log(address)
-  // console.log(byteCode.substring(0,6))
-  return byteCode != "0x"
+  var cache_name = "isContractMainnet" + address
+  if (shouldUseCache(cache_name, 1000)) {
+    return getFromCache(cache_name)
+  }
+  else {
+    var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+    const byteCode = await web3_infura_mainnet.eth.getCode(address)
+    cache(cache_name, byteCode != "0x")
+    return byteCode != "0x"
+  }
 }
 
 async function getReverseENS(address) {
-  setCookie("reverseENS_" + address, )
-  var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
-  const ensContractAddress = "0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C"
-  var contract = new web3_infura_mainnet.eth.Contract([{"inputs":[{"internalType":"contract ENS","name":"_ens","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address[]","name":"addresses","type":"address[]"}],"name":"getNames","outputs":[{"internalType":"string[]","name":"r","type":"string[]"}],"stateMutability":"view","type":"function"}],
-    ensContractAddress)
-  var result = await contract.methods.getNames([address]).call()
-  return result;
+  var cache_name = "getReverseENS" + address
+  if (shouldUseCache(cache_name, 5)) {
+    return getFromCache(cache_name)
+  }
+  else {
+    var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+    const ensContractAddress = "0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C"
+    var contract = new web3_infura_mainnet.eth.Contract([{"inputs":[{"internalType":"contract ENS","name":"_ens","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address[]","name":"addresses","type":"address[]"}],"name":"getNames","outputs":[{"internalType":"string[]","name":"r","type":"string[]"}],"stateMutability":"view","type":"function"}],
+      ensContractAddress)
+    var result = await contract.methods.getNames([address]).call()
+    cache(cache_name, result[0])
+    return result[0];
+  } 
+}
+
+async function getENSOwner(ens_name) {
+  var cache_name = "getENSOwner" + ens_name
+  if (shouldUseCache(cache_name, 5)) {
+    return getFromCache(cache_name)
+  }
+  else {
+    var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
+    web3_infura_mainnet.eth.ens.getOwner(ens_name).then(function (retrieved_address) {
+      var address = retrieved_address.toLowerCase();
+      cache(cache_name, address)
+      return address;
+    })
+  } 
 }
 
 var suggested_friends = new Set()
 var suggested_from_interacation = {}
 var load_recs_sync = new DispatchGroup();
+var didSyncRec = false
 load_recs_sync.notify(function() {
-  addRecommendedFollowers()
+  if (didSyncRec) {
+    addRecommendedFollowers()
+  }
 })
 async function processTransacationsEtherscan(transactionsJSON, web3) {
   var token_0 = load_recs_sync.enter();
+  didSyncRec = true
   transactionsJSON.result.forEach((transaction) => {
     const hash = transaction.hash;
     const timeStamp = transaction.timeStamp;
@@ -200,13 +220,13 @@ async function processTransacationsEtherscan(transactionsJSON, web3) {
         // console.log(is_contract)
         if ((!is_contract) && to.toLowerCase() !== ethaddress.toLowerCase()) {
           getReverseENS(to).then((ens_name) => {
-            if (ens_name == null || ens_name == undefined || (ens_name.length == 1 && ens_name[0] == "")) {
+            if (ens_name == null || ens_name == undefined || ens_name == "") {
               suggested_friends.add(to.toLowerCase())
               suggested_from_interacation[to.toLowerCase()] = hash;
             }
             else if (ens_name.length > 0) {
-              suggested_friends.add(ens_name[0])
-              suggested_from_interacation[ens_name[0]] = hash;
+              suggested_friends.add(ens_name)
+              suggested_from_interacation[ens_name] = hash;
             }
             load_recs_sync.leave(token1);
           })
@@ -226,13 +246,13 @@ async function processTransacationsEtherscan(transactionsJSON, web3) {
         // console.log(is_contract)
         if ((!is_contract) && from.toLowerCase() !== ethaddress.toLowerCase()) {
           getReverseENS(from).then((ens_name) => {
-            if (ens_name == null || ens_name == undefined || (ens_name.length == 1 && ens_name[0] == "")) {
+            if (ens_name == null || ens_name == undefined || ens_name == "") {
               suggested_friends.add(from.toLowerCase())
               suggested_from_interacation[from.toLowerCase()] = hash;
             }
-            else if (ens_name.length > 0) {
-              suggested_friends.add(ens_name[0])
-              suggested_from_interacation[ens_name[0]] = hash;
+            else {
+              suggested_friends.add(ens_name)
+              suggested_from_interacation[ens_name] = hash;
             }
             load_recs_sync.leave(token2)
           })
@@ -279,13 +299,13 @@ async function processTransacationsOpenSea(original_user_address, transactionsJS
         // console.log(is_contract)
         if (!is_contract && add_addr != ethaddress) {
           getReverseENS(add_addr).then((ens_name) => {
-            if (ens_name == null || ens_name == undefined || (ens_name.length == 1 && ens_name[0] == "")) {
+            if (ens_name == null || ens_name == undefined || ens_name == "") {
               suggested_friends.add(add_addr.toLowerCase())
               suggested_from_interacation[add_addr.toLowerCase()] = hash;
             }
             else if (ens_name.length > 0) {
-              suggested_friends.add(ens_name[0])
-              suggested_from_interacation[ens_name[0]] = hash;
+              suggested_friends.add(ens_name)
+              suggested_from_interacation[ens_name] = hash;
             }
             load_recs_sync.leave(token);
           })
@@ -327,6 +347,7 @@ async function getEtherscanTransacations(address, web3) {
   xmlHttpUpdate.send(null);
 }
 
+// no cache obviously
 async function getNumFollowers(address) {
   var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   var contract = new web3_rinkeby.eth.Contract(contract_abi, contract_address)
@@ -334,6 +355,7 @@ async function getNumFollowers(address) {
   return followersCount
 }
 
+// no cache obviously
 async function getNumFollowing(address) {
   var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   var contract = new web3_rinkeby.eth.Contract(contract_abi, contract_address)
@@ -341,6 +363,7 @@ async function getNumFollowing(address) {
   return followingCount
 }
 
+// this doesn't need cache cuz its only called when following someone
 async function NFTForAddressExists(address) {
   var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   var contract = new web3_rinkeby.eth.Contract(contract_abi, contract_address)
@@ -350,17 +373,27 @@ async function NFTForAddressExists(address) {
 }
 
 function addRecommendedFollowers() {
-  suggested_friends.forEach((suggested_friend) => {
-    if (!(userFollowing.includes(suggested_friend))) { // only show people not following
+  var didSync = false
+  var sync = new DispatchGroup();
+  sync.notify(function() {
+    if (didSync) {
       document.getElementById("recommended-followers").style.display = "block";
+    }
+  })
+  var token_0 = sync.enter()
+  didSync = true
+
+  suggested_friends.forEach((suggested_friend) => {
+    var token = sync.enter()
+    if (!(userFollowing.includes(suggested_friend))) { // only show people not following
       if (suggested_friend.includes(".eth")) {
-        var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
-        web3_infura_mainnet.eth.ens.getOwner(suggested_friend).then(function (retrieved_address) {
+        getENSOwner(suggested_friend).then(function (retrieved_address) {
           var address = retrieved_address.toLowerCase()
           // var div = '<div class="recommended-interaction"><div class="col-12"><a target="_blank" href="http://192.168.1.228:8080/test_profile/?address=' + suggested_friend + '"style="color: black;">' + suggested_friend + '</a></div><div class="col-12"><a class="rec-interaction-link" target="_blank" href="https://etherscan.io/tx/' + suggested_from_interacation[suggested_friend] + '">View</a><button class="rec-follow-button">Follow</button></div></div>'
           var div = '<div class="recommended-interaction row mx-auto mb-2" id="recommended_interaction_' + address + '"><a href="' + suggested_friend + '" class="followersModalAddress col-12 mx-auto my-auto text-center">' + suggested_friend + '</a><div class="mx-auto my-auto text-center"><button class="rec-interaction-link" style="float: right;" target="_blank" onclick="window.open(\'https://etherscan.io/tx/' + suggested_from_interacation[suggested_friend] + '\', \'_blank\')">Etherscan</button><button class="rec-follow-button" id="rec_follow_button_' + address + '" style="float: left">Follow</button></div></div>'
           document.getElementById("recommended-followers").innerHTML += div
           document.getElementById("rec_follow_button_" + address).setAttribute("onclick", 'followUnfollowRec("' + address + '",' + false + ')');
+          sync.leave(token)
         })
       }
       else {
@@ -368,9 +401,14 @@ function addRecommendedFollowers() {
         var div = '<div class="recommended-interaction row mx-auto mb-2" id="recommended_interaction_' + suggested_friend + '"><a href="' + suggested_friend + '" class="followersModalAddress col-12 mx-auto my-auto text-center">' + getShortAddress(suggested_friend) + '</a><div class="mx-auto my-auto text-center"><button class="rec-interaction-link" style="float: right;" target="_blank" onclick="window.open(\'https://etherscan.io/tx/' + suggested_from_interacation[suggested_friend] + '\', \'_blank\')">Etherscan</button><button class="rec-follow-button" id="rec_follow_button_' + suggested_friend + '" style="float: left">Follow</button></div></div>'
         document.getElementById("recommended-followers").innerHTML += div
         document.getElementById("rec_follow_button_" + suggested_friend).setAttribute("onclick", 'followUnfollowRec("' + suggested_friend + '",' + false + ')');
+        sync.leave(token)
       }
     }
+    else {
+      sync.leave(token)
+    }
   })
+  sync.leave(token_0);
 }
 
 var userFollowing = [] // the following of the user
@@ -459,6 +497,17 @@ async function loadLinksRinkeby() {
   link_names = {}
   link_delete_mode_on = false;
 
+  var didSync = false
+
+  var sync = new DispatchGroup();
+  sync.notify(function() {
+    if (didSync) {
+      document.getElementById("link-holder").style.display = "block";
+    }
+  })
+  var token_0 = sync.enter()
+  didSync = true
+
   document.getElementById("link-holder").innerHTML = ""
   var web3_rinkeby = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   var contract = new web3_rinkeby.eth.Contract(contract_abi, contract_address)
@@ -466,7 +515,6 @@ async function loadLinksRinkeby() {
   var num_content_links = await contract.methods.linksCount(page_address).call()
 
   if (page_address == ethaddress) {
-    document.getElementById("link-holder").style.display = "block";
     var html = '<button id="add_new_link"><div class="row mx-auto mb-0 mt-0"><div class="link_controls text-center col-12 my-auto mx-auto">Add Link</div></div></button>'
     document.getElementById("link-holder").innerHTML += html;
 
@@ -475,9 +523,11 @@ async function loadLinksRinkeby() {
       document.getElementById("link-holder").innerHTML += html;
     }
   }
+
   // add all the content links
   for (var i=0; i<num_content_links; i++) {
-    document.getElementById("link-holder").style.display = "block";
+    var token = sync.enter()
+
     var name = await contract.methods.linkNames(page_address, content_links[i]).call();
     link_names[content_links[i]] = name;
     var html = '<a style="color: black;" target="_blank" href="' + content_links[i] + '"><div class="row mx-auto mb-2 mt-2"><div class="social_link text-center col-12 my-auto mx-auto">' + name + '</div></div></a>'
@@ -486,10 +536,11 @@ async function loadLinksRinkeby() {
     // add delete for link
     var delete_html = '<button onclick="removeLink(\'' + content_links[i] + '\')" style="display: none;" class="delete_link mx-auto my-auto text-center"><div class="row mx-auto"><div class="delete_link_text text-center col-12 my-auto mx-auto">Delete Link</div></div></button>'
     document.getElementById("link-holder").innerHTML += delete_html;
+
+    sync.leave(token);
   }
   // Empty profile thats not user's
   if (num_content_links == 0 && page_address != ethaddress) {
-    document.getElementById("link-holder").style.display = "block";
     var html = '<div class="row mx-auto mb-2 mt-2"><div class="empty_links text-center col-12 my-auto mx-auto">BitProfile empty.<br/>No links have been added.</div></div>'
     document.getElementById("link-holder").innerHTML += html;
   }
@@ -533,6 +584,7 @@ async function loadLinksRinkeby() {
       newAvatarModal.style.display = "block";
     });
   }
+  sync.leave(token_0)
 }
 
 // We noticed that the current website tried to use the removed window.web3 API. If the site appears to be broken, please click here for more information.
@@ -923,11 +975,16 @@ function showFollowers() {
     length = 50;
   }
 
+  var didSync = false;
   var sync = new DispatchGroup();
   sync.notify(function() {
-    followersModal.style.display = "block";
+    if (didSync) {
+      followersModal.style.display = "block";
+    }
   })
+
   var token_0 = sync.enter()
+  didSync = true
   followers.forEach(function(item, i) {
     var token = sync.enter()
     if (i < length) {
@@ -939,7 +996,7 @@ function showFollowers() {
       var index = i;
 
       getReverseENS(followers[index]).then((ens_name) => {
-        if (ens_name != null && ens_name != undefined && ens_name != "") {
+        if (ens_name != null && ens_name != undefined && (ens_name != "")) {
           var html = '<div class="row mx-auto col-12 mb-2 mt-0"><a href="' + followers[index] + '" class="followersModalAddress col-8">' + ens_name + '</a><button class="follow-button col-4" id="follow_button_' + followers[index] + '">' + ((isFollowing) ? 'Unfollow'  : 'Follow') + '</button></div>'
           document.getElementById("followers_holder").innerHTML += html
           if (followers[index] == ethaddress) {
@@ -975,11 +1032,16 @@ function showFollowing() {
   
   document.getElementById("followers_holder").innerHTML = ""
 
+  var didSync = false
   var sync = new DispatchGroup();
   sync.notify(function() {
-    followersModal.style.display = "block";
+    if (didSync) {
+      followersModal.style.display = "block";
+    }
   })
+
   var token_0 = sync.enter()
+  didSync = true
   following.forEach(function(item, i) {
     var token = sync.enter()
     if (i < followingCount) {
@@ -1057,17 +1119,20 @@ async function loadProfile() {
 
     if (page_address.includes("eth")) {
       document.getElementById("username").innerHTML = page_address
-      web3_infura_mainnet.eth.ens.getOwner(page_address).then(function (owner) {
+      getENSOwner(page_address).then(function (owner) {
         page_address = owner.toLowerCase();
 
-        loadFollowersAndFollowingRinkeby()
         loadLinksRinkeby()
         loadAvatarMainnet()
 
-        if (page_address == ethaddress) {
-          getEtherscanTransacations(page_address, web3_user)
-          getOpenseaTransacations(page_address, web3_user)
-        }
+        // this needs to be here since it gets userFollowing, which is needed to see if following recs
+        loadFollowersAndFollowingRinkeby().then(function() {
+          if (page_address == ethaddress) {
+            getEtherscanTransacations(page_address, web3_user)
+            getOpenseaTransacations(page_address, web3_user)
+          }
+        })
+
       })
     }
     else {
@@ -1080,14 +1145,15 @@ async function loadProfile() {
         }
       })
       
-      loadFollowersAndFollowingRinkeby()
       loadLinksRinkeby()
       loadAvatarMainnet()
 
-      if (page_address == ethaddress) {        
-        getEtherscanTransacations(page_address, web3_user)
-        getOpenseaTransacations(page_address, web3_user)
-      }
+      loadFollowersAndFollowingRinkeby().then(function() {
+        if (page_address == ethaddress) {        
+          getEtherscanTransacations(page_address, web3_user)
+          getOpenseaTransacations(page_address, web3_user)
+        }
+      })
     }
     // the first thing we have to do is load the transacations for the account
     // could move this to be in a different function too
@@ -1101,6 +1167,8 @@ async function loadProfile() {
 }
 
 async function switchToPolygon() {
+
+  // polygon is 0x137
   try {
     await ethereum.request({
       method: 'wallet_switchEthereumChain',
@@ -1112,7 +1180,7 @@ async function switchToPolygon() {
       try {
         await ethereum.request({
           method: 'wallet_addEthereumChain',
-          params: [{ chainId: '0x137', rpcUrl: 'https://rpc-mainnet.matic.network', blockExplorerUrl: 'https://polygonscan.com'}],
+          params: [{ chainId: '0x4', rpcUrl: 'https://rpc-mainnet.matic.network', blockExplorerUrl: 'https://polygonscan.com'}],
         });
       } catch (addError) {
         // handle "add" error
@@ -1219,9 +1287,9 @@ function setupEnterApp() {
 
 // Things to add:
 // bio
-// add caching for account stuff to save space
 // Replace Rinkeby with Polygon
-// DM people Monday
+// DM people Tuesday. Send email.
+// (Done) add caching for account stuff to save space
 // (Done) profile image
 // (Done) change url to not use query
 // (Done) force update nft and lower how hard it is to draw
@@ -1231,9 +1299,6 @@ function setupEnterApp() {
 // (Done) followers and following
 // (Done) truncate address username: 0x409...92d79
 
-// loadFollowersAndFollowingRinkeby is very expensive and called a lot unecessarily
-
-// getReverseENS should be cached for a few days
 
 window.addEventListener('load', async () => {
   init();
@@ -1243,6 +1308,7 @@ window.addEventListener('load', async () => {
   setupEnterApp();
 });
 
+// linkNames can be cached
 
 // move loadLinksRinkeby() to not depend on wallet
 
