@@ -1359,8 +1359,9 @@ function setupEnterApp() {
 
 // Things to add:
 // bio
-// Replace Rinkeby with Polygon
 // DM people Tuesday. Send email.
+// Claim NFT
+// (Done) Replace Rinkeby with Polygon
 // (Done) add caching for account stuff to save space
 // (Done) profile image
 // (Done) change url to not use query
@@ -1370,7 +1371,6 @@ function setupEnterApp() {
 // (Done) Username have ENS name even if address in url ... also for followers
 // (Done) followers and following
 // (Done) truncate address username: 0x409...92d79
-
 
 // Popup modal showing message that their account is being funded and to wait a minute.
 
