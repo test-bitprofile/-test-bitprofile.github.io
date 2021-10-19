@@ -998,6 +998,16 @@ section {
   }
 }
 
+#medium_container {
+  margin-top: 40px;
+}
+
+@media (min-width: 1000px) {
+  #medium_container {
+    margin-top: 80px;
+  }
+}
+
 .followers-modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
