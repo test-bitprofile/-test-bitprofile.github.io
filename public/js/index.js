@@ -923,11 +923,11 @@ function showFollowers() {
           }
           document.getElementById("follow_button_" + followers[index]).setAttribute("onclick", 'followUnfollow("' + followers[index] + '",' + isFollowing + ')');
         }
-        sync.leave(token_1)
+        sync.leave(token)
       })
     }
     else {
-      sync.leave(token_1)
+      sync.leave(token)
     }
   })
   sync.leave(token_0)
@@ -973,11 +973,11 @@ function showFollowing() {
           }
           document.getElementById("follow_button_" + following[index]).setAttribute("onclick", 'followUnfollow("' + following[index] + '",' + isFollowing + ')');
         }
-        sync.leave(token_1)
+        sync.leave(token)
       })
     }
     else {
-      sync.leave(token_1)
+      sync.leave(token)
     }
   })
   sync.leave(token_0)
@@ -1130,6 +1130,17 @@ function setupModals() {
       newAvatarModal.style.display = "none";
     }
   }
+
+  var closes = document.getElementsByClassName("close");
+  Array.from(closes).forEach(function(close) {
+    close.onclick = function() {
+      chainModal.style.display = "none";
+      newLinkModal.style.display = "none";
+      followersModal.style.display = "none";
+      newAvatarModal.style.display = "none";
+    }
+  })
+    
 }
 
 function setupSearch() {
