@@ -108,6 +108,37 @@ var DispatchGroup = (function() {
     return DispatchGroup;
 })()
 
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+function setCookie(name,value,hours) {
+    var expires = "";
+    if (hours) {
+        var date = new Date();
+        date.setTime(date.getTime() + (hours*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
 function processERC721Transactions(transactionsJSON) {
   transactionsJSON.result.forEach((transaction) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -140,6 +171,7 @@ async function isContractMainnet(address) {
 }
 
 async function getReverseENS(address) {
+  setCookie("reverseENS_" + address, )
   var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   const ensContractAddress = "0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C"
   var contract = new web3_infura_mainnet.eth.Contract([{"inputs":[{"internalType":"contract ENS","name":"_ens","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address[]","name":"addresses","type":"address[]"}],"name":"getNames","outputs":[{"internalType":"string[]","name":"r","type":"string[]"}],"stateMutability":"view","type":"function"}],
@@ -923,11 +955,11 @@ function showFollowers() {
           }
           document.getElementById("follow_button_" + followers[index]).setAttribute("onclick", 'followUnfollow("' + followers[index] + '",' + isFollowing + ')');
         }
-        sync.leave(token_1)
+        sync.leave(token)
       })
     }
     else {
-      sync.leave(token_1)
+      sync.leave(token)
     }
   })
   sync.leave(token_0)
@@ -973,11 +1005,11 @@ function showFollowing() {
           }
           document.getElementById("follow_button_" + following[index]).setAttribute("onclick", 'followUnfollow("' + following[index] + '",' + isFollowing + ')');
         }
-        sync.leave(token_1)
+        sync.leave(token)
       })
     }
     else {
-      sync.leave(token_1)
+      sync.leave(token)
     }
   })
   sync.leave(token_0)
@@ -1006,12 +1038,13 @@ async function loadProfile() {
   var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
 
   // await web3Modal.clearCachedProvider()
+
   console.log("Opening a dialog", web3Modal);
   try {
-    // provider = await web3Modal.connect();
-    if (web3Modal.cachedProvider) {
-      provider = await web3Modal.connect();
-    }
+    provider = await web3Modal.connect();
+    // if (web3Modal.cachedProvider) {
+      // provider = await web3Modal.connect();
+    // }
 
     web3_user = new Web3(provider);
     const accounts = await web3_user.eth.getAccounts();
@@ -1129,6 +1162,17 @@ function setupModals() {
       newAvatarModal.style.display = "none";
     }
   }
+
+  var closes = document.getElementsByClassName("close");
+  Array.from(closes).forEach(function(close) {
+    close.onclick = function() {
+      chainModal.style.display = "none";
+      newLinkModal.style.display = "none";
+      followersModal.style.display = "none";
+      newAvatarModal.style.display = "none";
+    }
+  })
+    
 }
 
 function setupSearch() {
@@ -1146,24 +1190,25 @@ function setupSearch() {
 }
 
 async function enter_app() {
+  await web3Modal.clearCachedProvider()
   try {
-        provider = await web3Modal.connect();
-        web3_user = new Web3(provider);
-        const accounts = await web3_user.eth.getAccounts();
-        if (accounts !== null) {
-          console.log(accounts[0])
-          ethaddress = accounts[0].toLowerCase();
-          window.location.href = ethaddress;
-        }
-        else {
-          alert("Could not get a wallet connection", e);
-          return;
-        }
-      }
-      catch(e) {
-        alert("Could not get a wallet connection", e);
-        return;
-      }
+    provider = await web3Modal.connect();
+    web3_user = new Web3(provider);
+    const accounts = await web3_user.eth.getAccounts();
+    if (accounts !== null) {
+      console.log(accounts[0])
+      ethaddress = accounts[0].toLowerCase();
+      window.location.href = ethaddress;
+    }
+    else {
+      alert("Could not get a wallet connection");
+      return;
+    }
+  }
+  catch(e) {
+    // alert("Could not get a wallet connection", e);
+    return;
+  }
 }
 
 function setupEnterApp() {
@@ -1175,7 +1220,7 @@ function setupEnterApp() {
 // Things to add:
 // bio
 // add caching for account stuff to save space
-// Deploy to polygon and connect to function that loads account when first get connected
+// Replace Rinkeby with Polygon
 // DM people Monday
 // (Done) profile image
 // (Done) change url to not use query
@@ -1198,6 +1243,8 @@ window.addEventListener('load', async () => {
   setupEnterApp();
 });
 
+
+// move loadLinksRinkeby() to not depend on wallet
 
 // 0x0a22fEa31995ED13D43D37b617C9443ac22818Ad matic deployed contract
 

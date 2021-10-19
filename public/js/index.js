@@ -108,6 +108,37 @@ var DispatchGroup = (function() {
     return DispatchGroup;
 })()
 
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+function setCookie(name,value,hours) {
+    var expires = "";
+    if (hours) {
+        var date = new Date();
+        date.setTime(date.getTime() + (hours*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
 function processERC721Transactions(transactionsJSON) {
   transactionsJSON.result.forEach((transaction) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -140,6 +171,7 @@ async function isContractMainnet(address) {
 }
 
 async function getReverseENS(address) {
+  setCookie("reverseENS_" + address, )
   var web3_infura_mainnet = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/fee8c943351648ac819a52f3ee66bfbc"));
   const ensContractAddress = "0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C"
   var contract = new web3_infura_mainnet.eth.Contract([{"inputs":[{"internalType":"contract ENS","name":"_ens","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address[]","name":"addresses","type":"address[]"}],"name":"getNames","outputs":[{"internalType":"string[]","name":"r","type":"string[]"}],"stateMutability":"view","type":"function"}],
@@ -1188,7 +1220,7 @@ function setupEnterApp() {
 // Things to add:
 // bio
 // add caching for account stuff to save space
-// Deploy to polygon and connect to function that loads account when first get connected
+// Replace Rinkeby with Polygon
 // DM people Monday
 // (Done) profile image
 // (Done) change url to not use query
@@ -1211,6 +1243,8 @@ window.addEventListener('load', async () => {
   setupEnterApp();
 });
 
+
+// move loadLinksRinkeby() to not depend on wallet
 
 // 0x0a22fEa31995ED13D43D37b617C9443ac22818Ad matic deployed contract
 
