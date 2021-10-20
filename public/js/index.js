@@ -567,7 +567,11 @@ async function loadLinksRinkeby() {
 
     var name = await contract.methods.linkNames(page_address, content_links[i]).call();
     link_names[content_links[i]] = name;
-    var html = '<a style="color: black;" target="_blank" href="' + content_links[i] + '"><div class="row mx-auto mb-2 mt-2"><div class="social_link text-center col-12 my-auto mx-auto">' + name + '</div></div></a>'
+    var ref = content_links[i]
+    if (ref.includes("https") != true) {
+      ref = "https://" + ref
+    }
+    var html = '<a style="color: black;" target="_blank" href="' + ref + '"><div class="row mx-auto mb-2 mt-2"><div class="social_link text-center col-12 my-auto mx-auto">' + name + '</div></div></a>'
     document.getElementById("link-holder").innerHTML += html;
 
     // add delete for link
