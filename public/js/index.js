@@ -1288,6 +1288,11 @@ async function loadProfile() {
 
 var isUsingPolygon = false
 async function switchToPolygon() {
+  let id = await web3.eth.net.getId()
+  if (id == 137) {
+    isUsingPolygon = true
+    return;
+  }
   console.log("switching to polygon")
 
   // polygon is 0x89
