@@ -898,7 +898,7 @@ async function addNewAvatar() {
     var isUsingPolygon = false
   } 
   catch (switchError) {
-    alert("Network switch failed. Try switching to mainnet chain manually.")
+    alert("Network switch failed. Try switching to Ethereum Mainnet manually in wallet.")
   }
 
   var url_raw = document.getElementById("new_avatar_url").value;
