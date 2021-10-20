@@ -1288,7 +1288,7 @@ async function loadProfile() {
 
 var isUsingPolygon = false
 async function switchToPolygon() {
-  let id = await web3.eth.net.getId()
+  let id = await web3_user.eth.net.getId()
   if (id == 137) {
     isUsingPolygon = true
     return;
